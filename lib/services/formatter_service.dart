@@ -93,12 +93,12 @@ class FormatterService {
   }
 
   // Helper method to write YAML map with proper indentation
-  static void _writeYamlMap(StringBuffer buffer, Map<String, dynamic> map, int indent) {
+  static void _writeYamlMap(StringBuffer buffer, Map map, int indent) {
     map.forEach((key, value) {
       String indentation = ' ' * indent;
       if (value is Map) {
         buffer.writeln('$indentation$key:');
-        _writeYamlMap(buffer, value, indent + 2);
+        _writeYamlMap(buffer, value as Map<dynamic, dynamic>, indent + 2);
       } else if (value is List) {
         buffer.writeln('$indentation$key:');
         for (var item in value) {
