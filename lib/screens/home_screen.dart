@@ -84,34 +84,34 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildCategoryCard(
       BuildContext context, String category, List<Template> templates) {
-    // Choose icon based on category
-    IconData categoryIcon;
-    Color iconColor;
+    // Get image path and color based on category
+    String imagePath;
+    Color cardColor;
 
     switch (category) {
       case 'Technical Documents':
-        categoryIcon = Icons.description;
-        iconColor = Colors.blue;
+        imagePath = 'assets/images/categories/icon_technical.png';
+        cardColor = Colors.blue.withOpacity(0.1);
         break;
       case 'Creative Writing':
-        categoryIcon = Icons.create;
-        iconColor = Colors.purple;
+        imagePath = 'assets/images/categories/icon_creative.png';
+        cardColor = Colors.purple.withOpacity(0.1);
         break;
       case 'Academic Writing':
-        categoryIcon = Icons.school;
-        iconColor = Colors.amber;
+        imagePath = 'assets/images/categories/icon_academic.png';
+        cardColor = Colors.amber.withOpacity(0.1);
         break;
       case 'Journalism & Content Creation':
-        categoryIcon = Icons.article;
-        iconColor = Colors.green;
+        imagePath = 'assets/images/categories/icon_journalism.png';
+        cardColor = Colors.green.withOpacity(0.1);
         break;
       case 'Personal & Miscellaneous':
-        categoryIcon = Icons.person;
-        iconColor = Colors.orange;
+        imagePath = 'assets/images/categories/icon_personal.png';
+        cardColor = Colors.orange.withOpacity(0.1);
         break;
       default:
-        categoryIcon = Icons.folder;
-        iconColor = Colors.grey;
+        imagePath = 'assets/images/logo.png';
+        cardColor = Colors.grey.withOpacity(0.1);
     }
 
     return Card(
@@ -119,6 +119,7 @@ class HomeScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+      color: cardColor,
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -137,10 +138,10 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                categoryIcon,
-                size: 48,
-                color: iconColor,
+              Image.asset(
+                imagePath,
+                width: 48,
+                height: 48,
               ),
               const SizedBox(height: 16),
               Text(

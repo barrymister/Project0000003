@@ -94,6 +94,26 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
                 final format = FileFormat.getFormatByType(formatType);
                 final isSelected = formatProvider.selectedFormatType == formatType;
                 
+                // Get format icon path
+                String formatIconPath;
+                switch (formatType) {
+                  case FormatType.markdown:
+                    formatIconPath = 'assets/images/formats/format_markdown.png';
+                    break;
+                  case FormatType.plainText:
+                    formatIconPath = 'assets/images/formats/format_text.png';
+                    break;
+                  case FormatType.yaml:
+                    formatIconPath = 'assets/images/formats/format_yaml.png';
+                    break;
+                  case FormatType.restructuredText:
+                    formatIconPath = 'assets/images/formats/format_rst.png';
+                    break;
+                  case FormatType.asciidoc:
+                    formatIconPath = 'assets/images/formats/format_adoc.png';
+                    break;
+                }
+                
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: ChoiceChip(
@@ -104,9 +124,12 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
                         formatProvider.selectFormat(formatType);
                       }
                     },
-                    avatar: isSelected
-                        ? const Icon(Icons.check, size: 18)
-                        : null,
+                    avatar: Image.asset(
+                      formatIconPath,
+                      width: 18,
+                      height: 18,
+                    ),
+                    backgroundColor: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : null,
                   ),
                 );
               }).toList(),
