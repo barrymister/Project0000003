@@ -21,15 +21,15 @@ class FormatterService {
   // Convert to Markdown format
   static String _toMarkdown(Template template) {
     StringBuffer buffer = StringBuffer();
-    
+
     // Add title
     buffer.writeln('# ${template.name}');
     buffer.writeln();
-    
+
     // Add description
     buffer.writeln('*${template.description}*');
     buffer.writeln();
-    
+
     // Add fields
     for (var field in template.fields) {
       if (field.value.isNotEmpty) {
@@ -39,23 +39,23 @@ class FormatterService {
         buffer.writeln();
       }
     }
-    
+
     return buffer.toString();
   }
 
   // Convert to Plain Text format
   static String _toPlainText(Template template) {
     StringBuffer buffer = StringBuffer();
-    
+
     // Add title
     buffer.writeln('${template.name.toUpperCase()}');
     buffer.writeln('=' * template.name.length);
     buffer.writeln();
-    
+
     // Add description
     buffer.writeln('${template.description}');
     buffer.writeln();
-    
+
     // Add fields
     for (var field in template.fields) {
       if (field.value.isNotEmpty) {
@@ -65,7 +65,7 @@ class FormatterService {
         buffer.writeln();
       }
     }
-    
+
     return buffer.toString();
   }
 
@@ -76,16 +76,16 @@ class FormatterService {
       'category': template.category,
       'description': template.description,
     };
-    
+
     Map<String, dynamic> fieldsMap = {};
     for (var field in template.fields) {
       if (field.value.isNotEmpty) {
         fieldsMap[field.id] = field.value;
       }
     }
-    
+
     yamlMap['content'] = fieldsMap;
-    
+
     // Convert to YAML string
     StringBuffer buffer = StringBuffer();
     _writeYamlMap(buffer, yamlMap, 0);
@@ -98,7 +98,7 @@ class FormatterService {
       String indentation = ' ' * indent;
       if (value is Map) {
         buffer.writeln('$indentation$key:');
-        _writeYamlMap(buffer, value as Map<dynamic, dynamic>, indent + 2);
+        _writeYamlMap(buffer, value, indent + 2);
       } else if (value is List) {
         buffer.writeln('$indentation$key:');
         for (var item in value) {
@@ -122,16 +122,16 @@ class FormatterService {
   // Convert to reStructuredText format
   static String _toRestructuredText(Template template) {
     StringBuffer buffer = StringBuffer();
-    
+
     // Add title
     buffer.writeln(template.name);
     buffer.writeln('=' * template.name.length);
     buffer.writeln();
-    
+
     // Add description
     buffer.writeln('*${template.description}*');
     buffer.writeln();
-    
+
     // Add fields
     for (var field in template.fields) {
       if (field.value.isNotEmpty) {
@@ -142,22 +142,22 @@ class FormatterService {
         buffer.writeln();
       }
     }
-    
+
     return buffer.toString();
   }
 
   // Convert to AsciiDoc format
   static String _toAsciiDoc(Template template) {
     StringBuffer buffer = StringBuffer();
-    
+
     // Add title
     buffer.writeln('= ${template.name}');
     buffer.writeln();
-    
+
     // Add description
     buffer.writeln('_${template.description}_');
     buffer.writeln();
-    
+
     // Add fields
     for (var field in template.fields) {
       if (field.value.isNotEmpty) {
@@ -167,7 +167,7 @@ class FormatterService {
         buffer.writeln();
       }
     }
-    
+
     return buffer.toString();
   }
 }

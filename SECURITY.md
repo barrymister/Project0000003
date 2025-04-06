@@ -7,7 +7,7 @@
 If you discover a security vulnerability in Cosmoscribe:
 
 1. **Do not disclose it publicly.**
-2. **Email the maintainer directly:** barrymister@gmail.com
+2. **Email the maintainer directly:** barry.dcw@gmail.com
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce
