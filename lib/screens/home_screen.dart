@@ -5,6 +5,7 @@ import '../constants/template_data.dart';
 import '../constants/theme_constants.dart';
 import '../models/template_model.dart';
 import 'template_list_screen.dart';
+import 'recent_files_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   Future<void> _showExitConfirmation(BuildContext context) async {
@@ -77,13 +78,33 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Scribe your ideas across the cosmos',
-            style: AppTheme.headingStyle(context).copyWith(
-              color: Colors.white,
-              fontSize: 24,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Scribe your ideas across the cosmos',
+                  style: AppTheme.headingStyle(context).copyWith(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.history,
+                  color: Colors.white,
+                ),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const RecentFilesScreen(),
+                  ),
+                ),
+                tooltip: 'Recent Files',
+              ),
+            ],
           ),
+
           const SizedBox(height: 8),
           Text(
             'Select a category to get started',

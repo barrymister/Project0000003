@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'constants/theme_constants.dart';
 import 'providers/app_providers.dart';
+import 'providers/file_history_provider.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
@@ -18,6 +19,13 @@ class CosmoscribeApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => TemplateProvider()),
         ChangeNotifierProvider(create: (_) => FormatProvider()),
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = FileHistoryProvider();
+            provider.init(); // Initialize file history
+            return provider;
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'Cosmoscribe',
