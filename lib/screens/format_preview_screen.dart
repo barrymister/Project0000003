@@ -8,6 +8,7 @@ import '../models/template_model.dart';
 import '../providers/app_providers.dart';
 import '../services/file_service.dart';
 import '../services/formatter_service.dart';
+import '../providers/file_history_provider.dart';
 
 class FormatPreviewScreen extends StatefulWidget {
   const FormatPreviewScreen({super.key});
@@ -20,10 +21,21 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
   String _fileName = '';
   bool _isSaving = false;
   String? _saveResult;
+  String? _saveLocation;
+
+  Future<void> _updateSaveLocation() async {
+    final location = await FileService.getDefaultDirectory();
+    if (location != null) {
+      setState(() {
+        _saveLocation = '$location/Cosmoscribe';
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _updateSaveLocation();
     // Initialize filename based on template
     final templateProvider = Provider.of<TemplateProvider>(
       context,
@@ -124,6 +136,10 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
   }
 
   Widget _buildFileNameInput(BuildContext context) {
+    final saveLocationText = _saveLocation != null
+        ? 'File will be saved to: $_saveLocation'
+        : 'Preparing save location...';
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -145,6 +161,13 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
                 _fileName = value;
               });
             },
+          ),
+          const SizedBox(height: 8),
+          Text(
+            saveLocationText,
+            style: AppTheme.captionStyle(context).copyWith(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           ),
         ],
       ),
@@ -277,36 +300,68 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
 
   Future<void> _saveFile(
     BuildContext context,
+    Template template,
     String content,
     FileFormat format,
   ) async {
+    if (_fileName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a file name')),
+      );
+      return;
+    }
+
     setState(() {
       _isSaving = true;
       _saveResult = null;
     });
 
-    try {
-      final result = await FileService.saveFile(
-        content,
-        _fileName,
-        format.extension,
+    final result = await FileService.saveFile(
+      content,
+      _fileName,
+      format.extension,
+    );
+
+    setState(() {
+      _isSaving = false;
+      _saveResult = result;
+    });
+
+    if (result != null && !result.startsWith('Error') && !result.contains('denied')) {
+      // Add to file history
+      // ignore: use_build_context_synchronously
+      Provider.of<FileHistoryProvider>(context, listen: false).addFile(
+        path: result,
+        name: _fileName + format.extension,
+        format: format.name,
+        templateName: template.name,
+        categoryName: template.category,
       );
 
-      setState(() {
-        _isSaving = false;
-        if (result == null) {
-          _saveResult = 'Save operation cancelled';
-        } else if (result.startsWith('Error')) {
-          _saveResult = result;
-        } else {
-          _saveResult = 'File saved successfully to: $result';
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _isSaving = false;
-        _saveResult = 'Error saving file: $e';
-      });
+      // Show success message with file path
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('File saved successfully!'),
+              Text(
+                'Location: $result',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } else {
+      // Show error message
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result ?? 'Error saving file')),
+      );
     }
   }
 }
