@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-
-import '../constants/template_data.dart';
-import '../constants/theme_constants.dart';
-import '../models/template_model.dart';
+import '../providers/template_provider.dart';
 import 'template_list_screen.dart';
 import 'recent_files_screen.dart';
 
@@ -28,16 +26,16 @@ class HomeScreen extends StatelessWidget {
     );
 
     if (shouldExit == true) {
-      // Close the app
+      // Clean up and exit
       // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
+      await SystemNavigator.pop();
     }
   }
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final categories = TemplateData.getCategories();
+    final categories = context.read<TemplateProvider>().categories;
 
     return Scaffold(
       appBar: AppBar(
@@ -83,10 +81,10 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Scribe your ideas across the cosmos',
-                  style: AppTheme.headingStyle(context).copyWith(
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: Colors.white,
-                    fontSize: 24,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               IconButton(
@@ -108,8 +106,8 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Select a category to get started',
-            style: AppTheme.bodyStyle(context).copyWith(
-              color: Colors.white.withOpacity(0.9),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
         ],
@@ -129,7 +127,7 @@ class HomeScreen extends StatelessWidget {
       itemCount: categories.length,
       itemBuilder: (context, index) {
         final category = categories[index];
-        final templates = TemplateData.getTemplatesByCategory(category);
+        final templates = context.read<TemplateProvider>().getTemplatesByCategory(category);
         return _buildCategoryCard(context, category, templates);
       },
     );
@@ -180,7 +178,6 @@ class HomeScreen extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => TemplateListScreen(
                 category: category,
-                templates: templates,
               ),
             ),
           );
@@ -200,7 +197,7 @@ class HomeScreen extends StatelessWidget {
               Flexible(
                 child: Text(
                   category,
-                  style: AppTheme.subheadingStyle(context),
+                  style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -211,7 +208,7 @@ class HomeScreen extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   '${templates.length} templates',
-                  style: AppTheme.captionStyle(context),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
             ],

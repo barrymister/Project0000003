@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../providers/file_history_provider.dart';
 import '../models/file_history_model.dart';
 import '../constants/theme_constants.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class RecentFilesScreen extends StatelessWidget {
   const RecentFilesScreen({super.key});
@@ -173,16 +175,37 @@ class RecentFilesScreen extends StatelessWidget {
     }
   }
 
-  void _handleMenuAction(BuildContext context, String action, SavedFile file) {
+  Future<void> _handleMenuAction(BuildContext context, String action, SavedFile file) async {
     switch (action) {
       case 'open':
         _openFile(context, file);
         break;
       case 'share':
-        // TODO: Implement file sharing
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sharing coming soon!')),
-        );
+        try {
+          await Share.shareXFiles(
+            [XFile(file.path)],
+            sharePositionOrigin: Rect.fromLTWH(0, 0, 0, 0),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Error Sharing File', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(
+                    e.toString(),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              duration: const Duration(seconds: 6),
+            ),
+          );
+        }
         break;
       case 'remove':
         Provider.of<FileHistoryProvider>(context, listen: false)
@@ -192,10 +215,104 @@ class RecentFilesScreen extends StatelessWidget {
   }
 
   Future<void> _openFile(BuildContext context, SavedFile file) async {
-    // TODO: Implement file opening logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('File opening coming soon!')),
-    );
+    try {
+      // First check if file exists
+      final fileExists = await File(file.path).exists();
+      if (!fileExists) {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('File Not Found', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(
+                  'The file ${file.name} no longer exists at the specified location.',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            action: SnackBarAction(
+              label: 'Remove from List',
+              onPressed: () {
+                context.read<FileHistoryProvider>().removeFile(file.path);
+              },
+            ),
+            duration: const Duration(seconds: 8),
+            backgroundColor: Theme.of(context).colorScheme.errorContainer,
+          ),
+        );
+        return;
+      }
+
+      // Try to open the file
+      final uri = Uri.file(file.path);
+      final canOpen = await launchUrl(
+        uri,
+        mode: LaunchMode.externalNonBrowserApplication,
+      );
+      
+      if (!canOpen) {
+        // If we can't launch directly, show error
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Could not open file', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(
+                  'No app found to open ${file.format.toUpperCase()} files.',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            action: SnackBarAction(
+              label: 'Show Location',
+              onPressed: () async {
+                final folder = Uri.file(File(file.path).parent.path);
+                if (!await launchUrl(
+                  folder,
+                  mode: LaunchMode.externalNonBrowserApplication,
+                )) {
+                  // ignore: use_build_context_synchronously
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Could not open file location'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  );
+                }
+              },
+            ),
+            duration: const Duration(seconds: 6),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Error Opening File', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(
+                e.toString(),
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 6),
+        ),
+      );
+    }
   }
 
   void _showFileNotFoundError(BuildContext context, SavedFile file) {

@@ -1,20 +1,50 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../models/file_history_model.dart';
 
 class FileHistoryProvider with ChangeNotifier {
-  FileHistory _fileHistory = FileHistory();
-  bool _initialized = false;
+  static const String _storageKey = 'file_history';
+  SharedPreferences? _prefs;
+  final List<SavedFile> _recentFiles = [];
 
-  FileHistory get fileHistory => _fileHistory;
-  List<SavedFile> get recentFiles => _fileHistory.recentFiles;
+  FileHistoryProvider() {
+    _initPrefs();
+  }
+
+  Future<void> _initPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+    await _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final jsonString = _prefs?.getString(_storageKey);
+    if (jsonString != null) {
+      final List<dynamic> jsonList = json.decode(jsonString);
+      _recentFiles.clear();
+      _recentFiles.addAll(
+        jsonList.map((item) => SavedFile.fromJson(item)).toList(),
+      );
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveHistory() async {
+    if (_prefs != null) {
+      final jsonString = json.encode(
+        _recentFiles.map((file) => file.toJson()).toList(),
+      );
+      await _prefs!.setString(_storageKey, jsonString);
+    }
+  }
+
+  List<SavedFile> get recentFiles => List.unmodifiable(_recentFiles);
 
   Future<void> init() async {
-    if (_initialized) return;
+    if (_recentFiles.isNotEmpty) return;
     await _loadHistory();
-    _initialized = true;
   }
 
   Future<void> addFile({
@@ -28,55 +58,35 @@ class FileHistoryProvider with ChangeNotifier {
       path: path,
       name: name,
       format: format,
-      savedAt: DateTime.now(),
       templateName: templateName,
       categoryName: categoryName,
+      savedAt: DateTime.now(),
     );
     
-    _fileHistory.addFile(file);
+    // Remove any existing file with the same path
+    _recentFiles.removeWhere((f) => f.path == path);
+    
+    // Add the new file at the beginning
+    _recentFiles.insert(0, file);
+    
+    // Keep only the last 50 files
+    if (_recentFiles.length > 50) {
+      _recentFiles.removeLast();
+    }
+    
     await _saveHistory();
     notifyListeners();
   }
 
   Future<void> removeFile(String path) async {
-    _fileHistory.removeFile(path);
+    _recentFiles.removeWhere((file) => file.path == path);
     await _saveHistory();
     notifyListeners();
   }
 
   Future<void> clearHistory() async {
-    _fileHistory.clearHistory();
+    _recentFiles.clear();
     await _saveHistory();
     notifyListeners();
-  }
-
-  Future<String> get _historyFile async {
-    final directory = await getApplicationDocumentsDirectory();
-    return '${directory.path}/file_history.json';
-  }
-
-  Future<void> _loadHistory() async {
-    try {
-      final file = File(await _historyFile);
-      if (await file.exists()) {
-        final contents = await file.readAsString();
-        final List<dynamic> json = jsonDecode(contents);
-        _fileHistory.loadFromJson(
-          json.cast<Map<String, dynamic>>(),
-        );
-      }
-    } catch (e) {
-      debugPrint('Error loading file history: $e');
-    }
-  }
-
-  Future<void> _saveHistory() async {
-    try {
-      final file = File(await _historyFile);
-      final json = jsonEncode(_fileHistory.toJson());
-      await file.writeAsString(json);
-    } catch (e) {
-      debugPrint('Error saving file history: $e');
-    }
   }
 }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../providers/template_provider.dart';
 
-import '../constants/theme_constants.dart';
-import '../models/template_model.dart';
-import '../providers/app_providers.dart';
+import '../providers/format_provider.dart';
 import 'format_preview_screen.dart';
 
 class TemplateFormScreen extends StatefulWidget {
@@ -21,13 +19,15 @@ class TemplateFormScreen extends StatefulWidget {
 class _TemplateFormScreenState extends State<TemplateFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
+  late final Template _template;
 
   @override
   void initState() {
     super.initState();
     // Initialize controllers for each field
-    for (var field in widget.template.fields) {
-      _controllers[field.id] = TextEditingController(text: field.value);
+    _template = widget.template;
+    for (var field in _template.fields) {
+      _controllers[field] = TextEditingController();
     }
   }
 
@@ -72,14 +72,14 @@ class _TemplateFormScreenState extends State<TemplateFormScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          ...widget.template.fields.map((field) => _buildFieldInput(context, field)),
+          ..._template.fields.map((field) => _buildFieldInput(context, field)),
         ],
       ),
     );
   }
 
-  Widget _buildFieldInput(BuildContext context, TemplateField field) {
-    final controller = _controllers[field.id]!;
+  Widget _buildFieldInput(BuildContext context, String field) {
+    final controller = _controllers[field]!;
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -89,50 +89,27 @@ class _TemplateFormScreenState extends State<TemplateFormScreen> {
           Row(
             children: [
               Text(
-                field.label,
-                style: AppTheme.subheadingStyle(context).copyWith(
+                field,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontSize: 16,
                 ),
               ),
               const SizedBox(width: 4),
-              if (field.isRequired)
-                const Text(
-                  '*',
-                  style: TextStyle(
-                    color: AppTheme.errorColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            field.hint,
-            style: AppTheme.captionStyle(context),
-          ),
+
           const SizedBox(height: 8),
           TextFormField(
             controller: controller,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
             ),
-            maxLines: field.id.contains('description') || 
-                      field.id.contains('content') || 
-                      field.id.contains('lines') ? 
-                      5 : 1,
-            validator: (value) {
-              if (field.isRequired && (value == null || value.isEmpty)) {
-                return 'This field is required';
-              }
-              return null;
-            },
+            maxLines: field.toLowerCase().contains('description') || 
+                      field.toLowerCase().contains('content') ? 5 : 1,
             onChanged: (value) {
-              // Update the template field value
-              final templateProvider = Provider.of<TemplateProvider>(
-                context, 
-                listen: false,
-              );
-              templateProvider.updateTemplateField(field.id, value);
+
             },
           ),
         ],
@@ -159,16 +136,6 @@ class _TemplateFormScreenState extends State<TemplateFormScreen> {
             child: ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  // Save form data to template provider
-                  for (var field in widget.template.fields) {
-                    final controller = _controllers[field.id]!;
-                    final templateProvider = Provider.of<TemplateProvider>(
-                      context, 
-                      listen: false,
-                    );
-                    templateProvider.updateTemplateField(field.id, controller.text);
-                  }
-                  
                   // Navigate to format preview screen
                   Navigator.push(
                     context,
@@ -193,29 +160,19 @@ class _TemplateFormScreenState extends State<TemplateFormScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(widget.template.name),
+        title: Text(_template.name),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Description',
-              style: AppTheme.subheadingStyle(context).copyWith(fontSize: 16),
+              'Template Info',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
-              widget.template.description,
-              style: AppTheme.bodyStyle(context),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Use Case',
-              style: AppTheme.subheadingStyle(context).copyWith(fontSize: 16),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.template.useCase,
-              style: AppTheme.bodyStyle(context),
+              'This template contains ${_template.fields.length} fields.',
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),

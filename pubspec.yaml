@@ -49,6 +49,12 @@ dependencies:
   # Format conversion
   yaml: ^3.1.2
   markdown: ^7.2.1
+  
+  # Utilities
+  intl: ^0.19.0
+  url_launcher: ^6.2.5
+  share_plus: ^7.2.2
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

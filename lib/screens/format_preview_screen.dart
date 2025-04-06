@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
-import '../constants/theme_constants.dart';
-import '../models/format_model.dart';
-import '../models/template_model.dart';
-import '../providers/app_providers.dart';
-import '../services/file_service.dart';
-import '../services/formatter_service.dart';
+import '../providers/template_provider.dart';
+import '../providers/format_provider.dart';
 import '../providers/file_history_provider.dart';
+import '../services/file_service.dart';
+import '../models/format.dart';
+import '../models/template.dart';
 
 class FormatPreviewScreen extends StatefulWidget {
   const FormatPreviewScreen({super.key});
@@ -63,11 +62,18 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
       );
     }
     
-    final formatType = formatProvider.selectedFormatType;
     final format = formatProvider.selectedFormat;
     
     // Generate formatted content
-    final formattedContent = FormatterService.formatContent(template, formatType);
+    String formattedContent = '';
+    if (template != null) {
+      formattedContent = '''
+# ${template.name}
+
+## Fields
+${template.fields.map((field) => '- $field').join('\n')}
+''';
+    }
     
     return Scaffold(
       appBar: AppBar(
@@ -79,15 +85,17 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
           _buildFormatSelector(context, formatProvider),
           _buildFileNameInput(context),
           Expanded(
-            child: _buildPreview(context, formattedContent, formatType),
+            child: _buildPreview(context, formattedContent),
           ),
-          _buildBottomBar(context, template, formattedContent, format),
+          if (format != null)
+            _buildBottomBar(context, template, formattedContent, format),
         ],
       ),
     );
   }
 
   Widget _buildFormatSelector(BuildContext context, FormatProvider formatProvider) {
+    final selectedFormat = formatProvider.selectedFormat;
     return Container(
       padding: const EdgeInsets.all(16),
       color: Theme.of(context).colorScheme.surface,
@@ -96,18 +104,14 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
         children: [
           Text(
             'Select Format',
-            style: AppTheme.subheadingStyle(context),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: FormatType.values.map((formatType) {
-                final format = FileFormat.getFormatByType(formatType);
-                final isSelected = formatProvider.selectedFormatType == formatType;
-                
-                // Format name is sufficient, no need for icons
-                
+              children: formatProvider.formats.map((format) {
+                final isSelected = selectedFormat?.name == format.name;
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: ChoiceChip(
@@ -115,10 +119,9 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
                     selected: isSelected,
                     onSelected: (selected) {
                       if (selected) {
-                        formatProvider.selectFormat(formatType);
+                        formatProvider.selectFormat(format);
                       }
                     },
-
                     backgroundColor: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : null,
                   ),
                 );
@@ -126,10 +129,11 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            FileFormat.getFormatByType(formatProvider.selectedFormatType).description,
-            style: AppTheme.captionStyle(context),
-          ),
+          if (selectedFormat != null)
+            Text(
+              selectedFormat.description,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
         ],
       ),
     );
@@ -147,7 +151,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
         children: [
           Text(
             'File Name',
-            style: AppTheme.subheadingStyle(context).copyWith(fontSize: 16),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 16),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -165,8 +169,8 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
           const SizedBox(height: 8),
           Text(
             saveLocationText,
-            style: AppTheme.captionStyle(context).copyWith(
-              color: Theme.of(context).colorScheme.secondary,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
             ),
           ),
         ],
@@ -174,17 +178,17 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
     );
   }
 
-  Widget _buildPreview(BuildContext context, String content, FormatType formatType) {
+  Widget _buildPreview(BuildContext context, String content) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: AppTheme.dividerColor),
+        border: Border.all(color: Theme.of(context).dividerColor),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black12,
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -198,27 +202,30 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
               const Icon(
                 Icons.preview,
                 size: 20,
-                color: AppTheme.textSecondaryColor,
+                color: Colors.grey,
               ),
               const SizedBox(width: 8),
               Text(
                 'Preview',
-                style: AppTheme.subheadingStyle(context).copyWith(fontSize: 16),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 16),
               ),
             ],
           ),
           const Divider(),
           Expanded(
-            child: _buildPreviewContent(context, content, formatType),
+            child: _buildPreviewContent(context, content),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPreviewContent(BuildContext context, String content, FormatType formatType) {
+  Widget _buildPreviewContent(BuildContext context, String content) {
+    final formatProvider = context.read<FormatProvider>();
+    final selectedFormat = formatProvider.selectedFormat;
+    
     // For Markdown, use the flutter_markdown package
-    if (formatType == FormatType.markdown) {
+    if (selectedFormat?.name.toLowerCase() == 'markdown') {
       return Markdown(
         data: content,
         selectable: true,
@@ -241,7 +248,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
     BuildContext context,
     Template template,
     String content,
-    FileFormat format,
+    Format format,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -249,7 +256,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black12,
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -264,7 +271,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
                 _saveResult!,
                 style: TextStyle(
                   color: _saveResult!.startsWith('Error')
-                      ? AppTheme.errorColor
+                      ? Colors.red
                       : Colors.green,
                 ),
               ),
@@ -275,7 +282,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
                 child: ElevatedButton(
                   onPressed: _isSaving
                       ? null
-                      : () => _saveFile(context, content, format),
+                      : () => _saveFile(context, template, content, format),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -302,7 +309,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
     BuildContext context,
     Template template,
     String content,
-    FileFormat format,
+    Format format,
   ) async {
     if (_fileName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -316,51 +323,73 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
       _saveResult = null;
     });
 
-    final result = await FileService.saveFile(
-      content,
-      _fileName,
-      format.extension,
-    );
-
-    setState(() {
-      _isSaving = false;
-      _saveResult = result;
-    });
-
-    if (result != null && !result.startsWith('Error') && !result.contains('denied')) {
-      // Add to file history
-      // ignore: use_build_context_synchronously
-      Provider.of<FileHistoryProvider>(context, listen: false).addFile(
-        path: result,
-        name: _fileName + format.extension,
-        format: format.name,
-        templateName: template.name,
-        categoryName: template.category,
+    try {
+      final result = await FileService.saveFile(
+        content,
+        _fileName,
+        format.extension,
       );
 
-      // Show success message with file path
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (result != null && !result.startsWith('Error')) {
+        // Add to file history
+        Provider.of<FileHistoryProvider>(context, listen: false).addFile(
+          path: result,
+          name: '$_fileName.${format.extension}',
+          format: format.name,
+          templateName: template.name,
+          categoryName: template.category,
+        );
+
+        setState(() {
+          _saveResult = 'File saved successfully!';
+        });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('File saved successfully!'),
+                Text(
+                  'Location: $result',
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        setState(() {
+          _saveResult = result ?? 'Error saving file';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _saveResult = 'Error: $e';
+      });
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
+    }
         SnackBar(
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('File saved successfully!'),
+              const Text('Error Saving File', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
               Text(
-                'Location: $result',
-                style: const TextStyle(fontSize: 12),
+                result ?? 'Unknown error occurred',
+                style: const TextStyle(fontSize: 14),
               ),
             ],
           ),
-          duration: const Duration(seconds: 4),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 6),
         ),
-      );
-    } else {
-      // Show error message
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result ?? 'Error saving file')),
       );
     }
   }
