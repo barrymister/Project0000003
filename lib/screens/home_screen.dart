@@ -7,6 +7,31 @@ import '../models/template_model.dart';
 import 'template_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  Future<void> _showExitConfirmation(BuildContext context) async {
+    final bool? shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exit Cosmoscribe?'),
+        content: const Text('Are you sure you want to exit the app?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Exit'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldExit == true) {
+      // Close the app
+      // ignore: use_build_context_synchronously
+      Navigator.of(context).pop();
+    }
+  }
   const HomeScreen({super.key});
 
   @override
@@ -17,6 +42,13 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Cosmoscribe'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: () => _showExitConfirmation(context),
+            tooltip: 'Exit App',
+          ),
+        ],
       ),
       body: Column(
         children: [
