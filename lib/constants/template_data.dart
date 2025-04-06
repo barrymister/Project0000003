@@ -1,7 +1,9 @@
-import '../models/template_model.dart';
+import '../models/template.dart';
 
+/// Centralized storage for all template data
 class TemplateData {
-  static List<Template> allTemplates = [
+  /// All available templates in the application
+  static final List<Template> allTemplates = [
     // Technical Documents
     Template(
       id: 'prd',

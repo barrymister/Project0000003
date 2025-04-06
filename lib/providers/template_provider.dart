@@ -1,8 +1,39 @@
 import 'package:flutter/foundation.dart';
 import '../models/template.dart';
+import '../constants/template_data.dart';
 
-// Define template categories and their templates
-const Map<String, List<Template>> _templateCategories = {
+/// Provides access to available templates and manages the currently selected template
+class TemplateProvider with ChangeNotifier {
+  /// The currently selected template
+  Template? _selectedTemplate;
+  
+  /// Get the currently selected template
+  Template? get selectedTemplate => _selectedTemplate;
+
+  /// List of all available categories
+  List<String> get categories => TemplateData.categories;
+
+  /// Select a template and notify listeners
+  void selectTemplate(Template template) {
+    _selectedTemplate = template;
+    notifyListeners();
+  }
+
+  /// Get all templates for a specific category
+  List<Template> getTemplatesByCategory(String category) {
+    return TemplateData.getTemplatesByCategory(category);
+  }
+
+  /// Find a template by its name
+  Template? getTemplateByName(String name) {
+    return TemplateData.getTemplateByName(name);
+  }
+
+  /// Find a template by its ID
+  Template? getTemplateById(String id) {
+    return TemplateData.getTemplateById(id);
+  }
+}
   'Technical Documents': [
     Template(
       name: 'Product Requirements Document',

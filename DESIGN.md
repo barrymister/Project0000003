@@ -46,11 +46,24 @@ lib/
 ## Planned Features & Improvements
 
 ### Priority Improvements
-1. [ ] Add proper file management:
-   - Show current save location
-   - File history/recent files list
-   - Ability to browse and open previously saved files
-   - Clear indication of save status and location
+1. [x] Add proper file management:
+   - [x] Show current save location
+   - [x] File history/recent files list
+   - [ ] Ability to browse and open previously saved files
+   - [x] Clear indication of save status and location
+
+## Known Issues
+
+### Current Limitations
+1. **File Opening**: Opening previously saved files may not work correctly in all cases.
+2. **Template Navigation**: Some users may experience issues when navigating between templates.
+3. **Format Preview**: Complex formatting in preview mode may not match exactly with the final output.
+4. **Storage Permissions**: On some Android versions, storage permission handling may require manual intervention.
+
+### Technical Debt
+1. **Model Duplication**: Some model definitions are duplicated across the codebase.
+2. **Error Handling**: Error handling is inconsistent across different parts of the application.
+3. **Testing**: Lack of comprehensive test coverage for core functionality.
 2. [ ] Improve app navigation:
    - Add exit button in intuitive location (e.g., app bar menu)
    - Confirm exit if there are unsaved changes

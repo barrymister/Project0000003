@@ -1,6 +1,37 @@
 # Cosmoscribe
 
+<img src="assets/images/logo.png" alt="Cosmoscribe Logo" width="200"/>
+
 Cosmoscribe is an Android application developed using Flutter that empowers users to organize and save their brainstorming ideas across the cosmos. It transforms a single thought into a multitude of structured outputs through categorized templates.
+
+## Installation
+
+### Prerequisites
+- Flutter SDK (2.5.0 or higher)
+- Android Studio or VS Code with Flutter extensions
+- Android device or emulator (API level 21+)
+
+### Getting Started
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/barrymister/Project0000003.git
+   cd Project0000003
+   ```
+
+2. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+3. Run the app:
+   ```bash
+   flutter run
+   ```
+
+## Screenshots
+
+<!-- Add screenshots here once the app is complete -->
 
 ## Features
 
@@ -114,6 +145,32 @@ flutter build appbundle
 
 - **Direct Sale**: $3.99 for the full Cosmoscribe experience, including all templates and file formats.
 - **Freemium Option**: Free version with Markdown output and 5 basic templates, $1.99 in-app purchase to unlock all categories, templates, and formats.
+
+## Troubleshooting
+
+### Common Issues
+
+#### App crashes when saving files
+- Ensure storage permissions are granted in Android settings
+- Check that the destination folder exists and is writable
+- Verify there's enough storage space on the device
+
+#### Templates not loading
+- Restart the app to refresh the template cache
+- Check your internet connection if templates are loaded remotely
+- Clear app cache in Android settings
+
+#### Preview not displaying correctly
+- Some format previews may not render all features in the app
+- Try a different format if specific formatting isn't displaying properly
+- For complex documents, save the file and open in a dedicated viewer
+
+### Getting Help
+
+If you encounter any issues not covered here, please:
+1. Check the [Issues](https://github.com/barrymister/Project0000003/issues) page on GitHub
+2. Submit a new issue with detailed reproduction steps
+3. Include your device model and Android version
 
 ## License
 
