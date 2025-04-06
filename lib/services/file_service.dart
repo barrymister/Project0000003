@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:file_picker/file_picker.dart';
 
 class FileService {
   // Save content to a file
@@ -21,20 +20,29 @@ class FileService {
       // Get the download directory
       String? selectedDirectory;
       
-      try {
-        selectedDirectory = await FilePicker.platform.getDirectoryPath();
-        if (selectedDirectory == null) {
-          // User canceled the picker
-          return null;
-        }
-      } catch (e) {
-        // Fallback to downloads directory if directory picker fails
-        final directory = await getExternalStorageDirectory();
-        if (directory == null) {
-          return 'Could not access storage directory';
-        }
-        selectedDirectory = directory.path;
+      // Use the downloads directory directly
+      Directory? directory;
+      if (Platform.isAndroid) {
+        // For Android, use the external storage directory
+        directory = await getExternalStorageDirectory();
+      } else {
+        // For other platforms, use the documents directory
+        directory = await getApplicationDocumentsDirectory();
       }
+      
+      if (directory == null) {
+        return 'Could not access storage directory';
+      }
+      
+      selectedDirectory = directory.path;
+      
+      // Create a Cosmoscribe folder if it doesn't exist
+      final cosmoscribeDir = Directory('$selectedDirectory/Cosmoscribe');
+      if (!await cosmoscribeDir.exists()) {
+        await cosmoscribeDir.create(recursive: true);
+      }
+      
+      selectedDirectory = cosmoscribeDir.path;
 
       // Create the file
       final file = File('$selectedDirectory/$fileName$extension');
