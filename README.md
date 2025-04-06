@@ -53,54 +53,32 @@ Cosmoscribe is an Android application developed using Flutter that empowers user
 
 ### Prerequisites
 
-<<<<<<< HEAD
-- Flutter SDK
-=======
 - Flutter SDK (latest stable version)
->>>>>>> 7743d8c4c1d50dbf111cf3c07362fee022697e60
 - Android Studio or VS Code with Flutter extensions
 - Android device or emulator
 
 ### Installation
 
-<<<<<<< HEAD
-1. Clone the repository
-=======
 1. Clone this repository:
->>>>>>> 7743d8c4c1d50dbf111cf3c07362fee022697e60
    ```
    git clone https://github.com/barrymister/Project0000003.git
    ```
 
-<<<<<<< HEAD
-2. Navigate to the project directory
+2. Navigate to the project directory:
    ```
    cd Project0000003/temp/cosmoscribe
    ```
 
-3. Install dependencies
-=======
-2. Navigate to the project directory:
-   ```
-   cd Project0000003/cosmoscribe
-   ```
-
 3. Get dependencies:
->>>>>>> 7743d8c4c1d50dbf111cf3c07362fee022697e60
    ```
    flutter pub get
    ```
 
-<<<<<<< HEAD
-4. Run the app
-=======
 4. Run the app:
->>>>>>> 7743d8c4c1d50dbf111cf3c07362fee022697e60
    ```
    flutter run
    ```
 
-<<<<<<< HEAD
 ## Project Structure
 
 - `lib/models/`: Data models for templates and formats
@@ -113,12 +91,11 @@ Cosmoscribe is an Android application developed using Flutter that empowers user
 ## Dependencies
 
 - Provider: State management
-- File Picker: For selecting files to save
 - Path Provider: To find the correct file paths
 - Permission Handler: To manage permissions for file access
 - Flutter Markdown: For rendering markdown previews
 - Google Fonts: For custom typography
-=======
+
 ## Building for Release
 
 To build a release APK:
@@ -146,4 +123,3 @@ This project is proprietary and not licensed for redistribution.
 
 - Developed for Barry Mister
 - Created with Flutter and Dart
->>>>>>> 7743d8c4c1d50dbf111cf3c07362fee022697e60
