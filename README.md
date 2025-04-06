@@ -4,6 +4,29 @@
 
 Cosmoscribe is an Android application developed using Flutter that empowers users to organize and save their brainstorming ideas across the cosmos. It transforms a single thought into a multitude of structured outputs through categorized templates.
 
+## Quick Start
+
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/barrymister/Project0000003.git
+   cd Project0000003
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Connect an Android device or start an emulator.**
+
+4. **Run the app:**
+   ```bash
+   flutter run
+   ```
+
+5. **Select a template, fill in the fields, choose an export format, and save your document.**
+
+
 ## Installation
 
 ### Prerequisites
@@ -52,6 +75,8 @@ Cosmoscribe is an Android application developed using Flutter that empowers user
   - AsciiDoc (.adoc): Detailed, flexible output for writing or tech docs, supported by tools like Asciidoctor
 
 - **Preview and Save**: Preview your content in real-time and save it to your device
+
+When saving a document, you can **choose from these formats** to export your content. The app provides a format selection interface during the save process, allowing you to pick the most suitable output format for your needs.
 
 ## Categories and Templates
 
@@ -180,3 +205,26 @@ This project is proprietary and not licensed for redistribution.
 
 - Developed for Barry Mister
 - Created with Flutter and Dart
+
+## FAQ
+
+### How do I select a file format when saving?
+
+After filling out your template, tap **Save to Device**. You will be prompted to select from supported formats like Markdown, Plain Text, YAML, reStructuredText, or AsciiDoc.
+
+### Where are my saved files located?
+
+By default, files are saved in the **Cosmoscribe** folder inside your device's documents directory. You can view the save location before saving.
+
+### Can I add my own templates?
+
+Currently, templates are predefined. Future updates may support custom templates.
+
+### Why can't I open recent files?
+
+Ensure the file still exists on your device and that storage permissions are granted. Some emulators reset storage between sessions.
+
+### Does Cosmoscribe work offline?
+
+Yes, all features work without an internet connection.
+

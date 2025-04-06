@@ -52,7 +52,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
   Widget build(BuildContext context) {
     final templateProvider = Provider.of<TemplateProvider>(context);
     final formatProvider = Provider.of<FormatProvider>(context);
-    
+
     final template = templateProvider.selectedTemplate;
     if (template == null) {
       // Handle case where no template is selected (shouldn't happen normally)
@@ -61,9 +61,9 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
         body: const Center(child: Text('No template selected')),
       );
     }
-    
+
     final format = formatProvider.selectedFormat;
-    
+
     // Generate formatted content
     String formattedContent = '';
     if (template != null) {
@@ -74,19 +74,14 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
 ${template.fields.map((field) => '- $field').join('\n')}
 ''';
     }
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Preview & Save'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Preview & Save'), centerTitle: true),
       body: Column(
         children: [
           _buildFormatSelector(context, formatProvider),
           _buildFileNameInput(context),
-          Expanded(
-            child: _buildPreview(context, formattedContent),
-          ),
+          Expanded(child: _buildPreview(context, formattedContent)),
           if (format != null)
             _buildBottomBar(context, template, formattedContent, format),
         ],
@@ -94,7 +89,10 @@ ${template.fields.map((field) => '- $field').join('\n')}
     );
   }
 
-  Widget _buildFormatSelector(BuildContext context, FormatProvider formatProvider) {
+  Widget _buildFormatSelector(
+    BuildContext context,
+    FormatProvider formatProvider,
+  ) {
     final selectedFormat = formatProvider.selectedFormat;
     return Container(
       padding: const EdgeInsets.all(16),
@@ -102,30 +100,33 @@ ${template.fields.map((field) => '- $field').join('\n')}
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Select Format',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('Select Format', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: formatProvider.formats.map((format) {
-                final isSelected = selectedFormat?.name == format.name;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: ChoiceChip(
-                    label: Text(format.name),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) {
-                        formatProvider.selectFormat(format);
-                      }
-                    },
-                    backgroundColor: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : null,
-                  ),
-                );
-              }).toList(),
+              children:
+                  formatProvider.formats.map((format) {
+                    final isSelected = selectedFormat?.name == format.name;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: ChoiceChip(
+                        label: Text(format.name),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            formatProvider.selectFormat(format);
+                          }
+                        },
+                        backgroundColor:
+                            isSelected
+                                ? Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.1)
+                                : null,
+                      ),
+                    );
+                  }).toList(),
             ),
           ),
           const SizedBox(height: 8),
@@ -140,9 +141,10 @@ ${template.fields.map((field) => '- $field').join('\n')}
   }
 
   Widget _buildFileNameInput(BuildContext context) {
-    final saveLocationText = _saveLocation != null
-        ? 'File will be saved to: $_saveLocation'
-        : 'Preparing save location...';
+    final saveLocationText =
+        _saveLocation != null
+            ? 'File will be saved to: $_saveLocation'
+            : 'Preparing save location...';
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -151,7 +153,9 @@ ${template.fields.map((field) => '- $field').join('\n')}
         children: [
           Text(
             'File Name',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 16),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontSize: 16),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -199,22 +203,18 @@ ${template.fields.map((field) => '- $field').join('\n')}
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.preview,
-                size: 20,
-                color: Colors.grey,
-              ),
+              const Icon(Icons.preview, size: 20, color: Colors.grey),
               const SizedBox(width: 8),
               Text(
                 'Preview',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 16),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontSize: 16),
               ),
             ],
           ),
           const Divider(),
-          Expanded(
-            child: _buildPreviewContent(context, content),
-          ),
+          Expanded(child: _buildPreviewContent(context, content)),
         ],
       ),
     );
@@ -223,23 +223,17 @@ ${template.fields.map((field) => '- $field').join('\n')}
   Widget _buildPreviewContent(BuildContext context, String content) {
     final formatProvider = context.read<FormatProvider>();
     final selectedFormat = formatProvider.selectedFormat;
-    
+
     // For Markdown, use the flutter_markdown package
     if (selectedFormat?.name.toLowerCase() == 'markdown') {
-      return Markdown(
-        data: content,
-        selectable: true,
-      );
+      return Markdown(data: content, selectable: true);
     }
-    
+
     // For other formats, just show as plain text
     return SingleChildScrollView(
       child: SelectableText(
         content,
-        style: const TextStyle(
-          fontFamily: 'monospace',
-          fontSize: 14,
-        ),
+        style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
       ),
     );
   }
@@ -270,9 +264,10 @@ ${template.fields.map((field) => '- $field').join('\n')}
               child: Text(
                 _saveResult!,
                 style: TextStyle(
-                  color: _saveResult!.startsWith('Error')
-                      ? Colors.red
-                      : Colors.green,
+                  color:
+                      _saveResult!.startsWith('Error')
+                          ? Colors.red
+                          : Colors.green,
                 ),
               ),
             ),
@@ -280,22 +275,24 @@ ${template.fields.map((field) => '- $field').join('\n')}
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _isSaving
-                      ? null
-                      : () => _saveFile(context, template, content, format),
+                  onPressed:
+                      _isSaving
+                          ? null
+                          : () => _saveFile(context, template, content, format),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Save to Device'),
+                  child:
+                      _isSaving
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : const Text('Save to Device'),
                 ),
               ),
             ],
@@ -312,9 +309,9 @@ ${template.fields.map((field) => '- $field').join('\n')}
     Format format,
   ) async {
     if (_fileName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a file name')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a file name')));
       return;
     }
 
@@ -352,10 +349,7 @@ ${template.fields.map((field) => '- $field').join('\n')}
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('File saved successfully!'),
-                Text(
-                  'Location: $result',
-                  style: const TextStyle(fontSize: 12),
-                ),
+                Text('Location: $result', style: const TextStyle(fontSize: 12)),
               ],
             ),
           ),
@@ -373,24 +367,6 @@ ${template.fields.map((field) => '- $field').join('\n')}
       setState(() {
         _isSaving = false;
       });
-    }
-        SnackBar(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Error Saving File', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text(
-                result ?? 'Unknown error occurred',
-                style: const TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          duration: const Duration(seconds: 6),
-        ),
-      );
     }
   }
 }

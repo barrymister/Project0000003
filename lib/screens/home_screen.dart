@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/template_provider.dart';
+import '../models/template.dart';
 import 'template_list_screen.dart';
 import 'recent_files_screen.dart';
 
@@ -9,20 +10,21 @@ class HomeScreen extends StatelessWidget {
   Future<void> _showExitConfirmation(BuildContext context) async {
     final bool? shouldExit = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Exit Cosmoscribe?'),
-        content: const Text('Are you sure you want to exit the app?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Exit Cosmoscribe?'),
+            content: const Text('Are you sure you want to exit the app?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Exit'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Exit'),
-          ),
-        ],
-      ),
     );
 
     if (shouldExit == true) {
@@ -31,6 +33,7 @@ class HomeScreen extends StatelessWidget {
       await SystemNavigator.pop();
     }
   }
+
   const HomeScreen({super.key});
 
   @override
@@ -52,9 +55,7 @@ class HomeScreen extends StatelessWidget {
       body: Column(
         children: [
           _buildHeader(context),
-          Expanded(
-            child: _buildCategoryGrid(context, categories),
-          ),
+          Expanded(child: _buildCategoryGrid(context, categories)),
         ],
       ),
     );
@@ -81,23 +82,21 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Scribe your ideas across the cosmos',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.history,
-                  color: Colors.white,
-                ),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RecentFilesScreen(),
-                  ),
-                ),
+                icon: const Icon(Icons.history, color: Colors.white),
+                onPressed:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RecentFilesScreen(),
+                      ),
+                    ),
                 tooltip: 'Recent Files',
               ),
             ],
@@ -127,14 +126,19 @@ class HomeScreen extends StatelessWidget {
       itemCount: categories.length,
       itemBuilder: (context, index) {
         final category = categories[index];
-        final templates = context.read<TemplateProvider>().getTemplatesByCategory(category);
+        final templates = context
+            .read<TemplateProvider>()
+            .getTemplatesByCategory(category);
         return _buildCategoryCard(context, category, templates);
       },
     );
   }
 
   Widget _buildCategoryCard(
-      BuildContext context, String category, List<Template> templates) {
+    BuildContext context,
+    String category,
+    List<Template> templates,
+  ) {
     // Get image path and color based on category
     String imagePath;
     Color cardColor;
@@ -167,18 +171,14 @@ class HomeScreen extends StatelessWidget {
 
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: cardColor,
       child: InkWell(
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TemplateListScreen(
-                category: category,
-              ),
+              builder: (context) => TemplateListScreen(category: category),
             ),
           );
         },
@@ -188,11 +188,7 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                imagePath,
-                width: 32,
-                height: 32,
-              ),
+              Image.asset(imagePath, width: 32, height: 32),
               const SizedBox(height: 4),
               Flexible(
                 child: Text(
