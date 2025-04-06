@@ -86,7 +86,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
             'Select Format',
             style: AppTheme.subheadingStyle(context),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -94,25 +94,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
                 final format = FileFormat.getFormatByType(formatType);
                 final isSelected = formatProvider.selectedFormatType == formatType;
                 
-                // Get format icon path
-                String formatIconPath;
-                switch (formatType) {
-                  case FormatType.markdown:
-                    formatIconPath = 'assets/images/formats/format_markdown.png';
-                    break;
-                  case FormatType.plainText:
-                    formatIconPath = 'assets/images/formats/format_text.png';
-                    break;
-                  case FormatType.yaml:
-                    formatIconPath = 'assets/images/formats/format_yaml.png';
-                    break;
-                  case FormatType.restructuredText:
-                    formatIconPath = 'assets/images/formats/format_rst.png';
-                    break;
-                  case FormatType.asciidoc:
-                    formatIconPath = 'assets/images/formats/format_adoc.png';
-                    break;
-                }
+                // Format name is sufficient, no need for icons
                 
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
@@ -124,11 +106,7 @@ class _FormatPreviewScreenState extends State<FormatPreviewScreen> {
                         formatProvider.selectFormat(formatType);
                       }
                     },
-                    avatar: Image.asset(
-                      formatIconPath,
-                      width: 18,
-                      height: 18,
-                    ),
+
                     backgroundColor: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : null,
                   ),
                 );

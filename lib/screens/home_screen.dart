@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -67,11 +67,11 @@ class HomeScreen extends StatelessWidget {
   Widget _buildCategoryGrid(BuildContext context, List<String> categories) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: MediaQuery.of(context).size.width > 600 ? 1.5 : 0.95,
       ),
       itemCount: categories.length,
       itemBuilder: (context, index) {
@@ -134,25 +134,32 @@ class HomeScreen extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
                 imagePath,
-                width: 48,
-                height: 48,
+                width: 32,
+                height: 32,
               ),
-              const SizedBox(height: 16),
-              Text(
-                category,
-                style: AppTheme.subheadingStyle(context),
-                textAlign: TextAlign.center,
+              const SizedBox(height: 4),
+              Flexible(
+                child: Text(
+                  category,
+                  style: AppTheme.subheadingStyle(context),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '${templates.length} templates',
-                style: AppTheme.captionStyle(context),
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '${templates.length} templates',
+                  style: AppTheme.captionStyle(context),
+                ),
               ),
             ],
           ),
