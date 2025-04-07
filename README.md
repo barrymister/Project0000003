@@ -4,9 +4,16 @@
 
 Cosmoscribe is an Android application developed using Flutter that empowers users to organize and save their brainstorming ideas across the cosmos. It transforms a single thought into a multitude of structured outputs through categorized templates.
 
-## Quick Start
+## Getting Started
 
-1. **Clone the repo:**
+### Prerequisites
+- Flutter SDK (2.5.0 or higher)
+- Android Studio or VS Code with Flutter extensions
+- Android device or emulator (API level 21+)
+
+### Setup Instructions
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/barrymister/Project0000003.git
    cd Project0000003
@@ -25,32 +32,6 @@ Cosmoscribe is an Android application developed using Flutter that empowers user
    ```
 
 5. **Select a template, fill in the fields, choose an export format, and save your document.**
-
-
-## Installation
-
-### Prerequisites
-- Flutter SDK (2.5.0 or higher)
-- Android Studio or VS Code with Flutter extensions
-- Android device or emulator (API level 21+)
-
-### Getting Started
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/barrymister/Project0000003.git
-   cd Project0000003
-   ```
-
-2. Install dependencies:
-   ```bash
-   flutter pub get
-   ```
-
-3. Run the app:
-   ```bash
-   flutter run
-   ```
 
 ## Screenshots
 

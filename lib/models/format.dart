@@ -1,80 +1,88 @@
-/// Represents a file format supported by the application
+/// Supported file formats and metadata
+enum FormatType { markdown, plainText, yaml, restructuredText, asciidoc }
+
 class Format {
-  /// The display name of the format
+  final FormatType type;
   final String name;
-  
-  /// The file extension (without the dot)
-  final String extension;
-  
-  /// A brief description of the format
+  final String extension; // with dot, e.g., '.md'
   final String description;
-  
-  /// The MIME type for this format
   final String mimeType;
 
-  /// Creates a new Format instance
   const Format({
+    required this.type,
     required this.name,
     required this.extension,
     required this.description,
-    this.mimeType = 'text/plain',
+    required this.mimeType,
   });
 
-  /// List of all supported formats
   static const List<Format> allFormats = [
     Format(
+      type: FormatType.markdown,
       name: 'Markdown',
-      extension: 'md',
-      description: 'Popular markup language for creating formatted text',
+      extension: '.md',
+      description:
+          'Widely portable and readable in text editors or platforms like GitHub.',
       mimeType: 'text/markdown',
     ),
     Format(
+      type: FormatType.plainText,
       name: 'Plain Text',
-      extension: 'txt',
-      description: 'Simple text without formatting',
+      extension: '.txt',
+      description:
+          'Simplest output, universally compatible, no formatting overhead.',
       mimeType: 'text/plain',
     ),
     Format(
+      type: FormatType.yaml,
       name: 'YAML',
-      extension: 'yaml',
-      description: 'Human-readable data serialization format',
+      extension: '.yaml',
+      description:
+          'Structured data format, ideal for tech users or parsing into other systems.',
       mimeType: 'application/x-yaml',
     ),
     Format(
+      type: FormatType.restructuredText,
       name: 'reStructuredText',
-      extension: 'rst',
-      description: 'Easy-to-read plaintext markup syntax',
+      extension: '.rst',
+      description:
+          'Richer formatting for technical documentation, convertible to HTML/PDF.',
       mimeType: 'text/x-rst',
     ),
     Format(
+      type: FormatType.asciidoc,
       name: 'AsciiDoc',
-      extension: 'adoc',
-      description: 'Lightweight markup language for creating documentation',
+      extension: '.adoc',
+      description:
+          'Detailed, flexible output for writing or tech docs, supported by tools like Asciidoctor.',
       mimeType: 'text/x-asciidoc',
     ),
   ];
-  
-  /// Find a format by its name
+
+  static Format? getByType(FormatType type) {
+    return allFormats.firstWhere(
+      (f) => f.type == type,
+      orElse: () => allFormats.first,
+    );
+  }
+
   static Format? getByName(String name) {
     try {
       return allFormats.firstWhere(
-        (format) => format.name.toLowerCase() == name.toLowerCase(),
+        (f) => f.name.toLowerCase() == name.toLowerCase(),
       );
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
-  
-  /// Find a format by its extension
-  static Format? getByExtension(String extension) {
-    // Remove leading dot if present
-    final ext = extension.startsWith('.') ? extension.substring(1) : extension;
-    
+
+  static Format? getByExtension(String ext) {
+    final cleaned = ext.startsWith('.') ? ext : '.$ext';
     try {
       return allFormats.firstWhere(
-        (format) => format.extension.toLowerCase() == ext.toLowerCase(),
+        (f) => f.extension.toLowerCase() == cleaned.toLowerCase(),
       );
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }

@@ -1,5 +1,5 @@
-import '../models/format_model.dart';
-import '../models/template_model.dart';
+import '../models/format.dart';
+import '../models/template.dart';
 
 class FormatterService {
   // Convert template data to the selected format
