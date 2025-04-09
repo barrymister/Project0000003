@@ -6,6 +6,7 @@ import '../providers/template_provider.dart';
 import '../providers/format_provider.dart';
 import '../providers/file_history_provider.dart';
 import '../services/file_service.dart';
+import '../services/logger_service.dart';
 import '../models/format.dart';
 import '../models/template.dart';
 
@@ -308,7 +309,11 @@ ${template.fields.map((field) => '- $field').join('\n')}
     String content,
     Format format,
   ) async {
+    final logger = LoggerService();
+    logger.log('Save file requested: $_fileName.${format.extension}');
+    
     if (_fileName.isEmpty) {
+      logger.logWarning('Save attempted with empty filename');
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please enter a file name')));
@@ -319,16 +324,27 @@ ${template.fields.map((field) => '- $field').join('\n')}
       _isSaving = true;
       _saveResult = null;
     });
+    
+    logger.log('Starting file save process');
+    logger.log('Template: ${template.name}');
+    logger.log('Format: ${format.name}');
+    logger.log('Content length: ${content.length} characters');
 
     try {
+      logger.log('Calling FileService.saveFile');
       final result = await FileService.saveFile(
         content,
         _fileName,
         format.extension,
       );
+      
+      logger.log('FileService.saveFile result: $result');
 
       if (result != null && !result.startsWith('Error')) {
+        logger.log('File saved successfully at: $result');
+        
         // Add to file history
+        logger.log('Adding file to history');
         Provider.of<FileHistoryProvider>(context, listen: false).addFile(
           path: result,
           name: '$_fileName.${format.extension}',
@@ -340,6 +356,8 @@ ${template.fields.map((field) => '- $field').join('\n')}
         setState(() {
           _saveResult = 'File saved successfully!';
         });
+        
+        logger.log('File save completed successfully');
 
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
@@ -355,15 +373,18 @@ ${template.fields.map((field) => '- $field').join('\n')}
           ),
         );
       } else {
+        logger.logError('Error saving file: ${result ?? 'Unknown error'}');
         setState(() {
           _saveResult = result ?? 'Error saving file';
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      logger.logError('Exception during file save', e, stackTrace);
       setState(() {
         _saveResult = 'Error: $e';
       });
     } finally {
+      logger.log('File save process completed');
       setState(() {
         _isSaving = false;
       });

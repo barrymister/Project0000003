@@ -5,8 +5,29 @@ import '../providers/template_provider.dart';
 import '../models/template.dart';
 import 'template_list_screen.dart';
 import 'recent_files_screen.dart';
+import 'logs_screen.dart';
+import '../services/logger_service.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+  
+  void _handleMenuAction(BuildContext context, String action) {
+    final logger = LoggerService();
+    
+    switch (action) {
+      case 'debug_logs':
+        logger.log('User accessed debug logs screen');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LogsScreen()),
+        );
+        break;
+      case 'exit':
+        _showExitConfirmation(context);
+        break;
+    }
+  }
+  
   Future<void> _showExitConfirmation(BuildContext context) async {
     final bool? shouldExit = await showDialog<bool>(
       context: context,
@@ -34,7 +55,7 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  const HomeScreen({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +67,38 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () => _showExitConfirmation(context),
-            tooltip: 'Exit App',
+            icon: const Icon(Icons.history),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const RecentFilesScreen()),
+            ),
+            tooltip: 'Recent Files',
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) => _handleMenuAction(context, value),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'debug_logs',
+                child: Row(
+                  children: [
+                    Icon(Icons.bug_report),
+                    SizedBox(width: 8),
+                    Text('Debug Logs'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'exit',
+                child: Row(
+                  children: [
+                    Icon(Icons.exit_to_app),
+                    SizedBox(width: 8),
+                    Text('Exit App'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -77,29 +127,10 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Scribe your ideas across the cosmos',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.history, color: Colors.white),
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RecentFilesScreen(),
-                      ),
-                    ),
-                tooltip: 'Recent Files',
-              ),
-            ],
+          Text(
+            'Scribe your ideas across the cosmos',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white),
+            textAlign: TextAlign.center,
           ),
 
           const SizedBox(height: 8),

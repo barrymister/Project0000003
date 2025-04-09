@@ -7,14 +7,24 @@ import 'providers/file_history_provider.dart';
 import 'providers/format_provider.dart';
 import 'providers/template_provider.dart';
 import 'screens/splash_screen.dart';
+import 'services/logger_service.dart';
 
-void main() {
+void main() async {
+  // Ensure Flutter is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize logger service
+  final logger = LoggerService();
+  await logger.init();
+  logger.log('Application starting');
+  
   runApp(const CosmoscribeApp());
 
   if (Platform.isAndroid) {
     // Handle app lifecycle to clean up resources
     SystemChannels.lifecycle.setMessageHandler((msg) async {
       if (msg == AppLifecycleState.detached.toString()) {
+        logger.log('Application detached');
         await SystemNavigator.pop();
       }
       return null;

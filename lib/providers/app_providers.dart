@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/format_model.dart';
-import '../models/template_model.dart';
+import '../models/format.dart';
+import '../models/template.dart';
 
 class TemplateProvider extends ChangeNotifier {
   Template? _selectedTemplate;
@@ -32,7 +32,7 @@ class FormatProvider extends ChangeNotifier {
   FormatType _selectedFormatType = FormatType.markdown;
   
   FormatType get selectedFormatType => _selectedFormatType;
-  FileFormat get selectedFormat => FileFormat.getFormatByType(_selectedFormatType);
+  Format? get selectedFormat => Format.getByType(_selectedFormatType);
   
   void selectFormat(FormatType formatType) {
     _selectedFormatType = formatType;

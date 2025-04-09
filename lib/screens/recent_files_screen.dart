@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../providers/file_history_provider.dart';
 import '../models/file_history_model.dart';
 import '../constants/theme_constants.dart';
+import '../services/logger_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -170,8 +171,10 @@ class RecentFilesScreen extends StatelessWidget {
     );
 
     if (confirmed == true) {
-      // ignore: use_build_context_synchronously
-      Provider.of<FileHistoryProvider>(context, listen: false).clearHistory();
+      // Store context in a local variable to avoid async gap issues
+      final currentContext = context;
+      if (!currentContext.mounted) return;
+      Provider.of<FileHistoryProvider>(currentContext, listen: false).clearHistory();
     }
   }
 
@@ -215,49 +218,57 @@ class RecentFilesScreen extends StatelessWidget {
   }
 
   Future<void> _openFile(BuildContext context, SavedFile file) async {
+    final logger = LoggerService();
+    logger.log('Attempting to open file: ${file.path}');
+    
     try {
       // First check if file exists
+      logger.log('Checking if file exists: ${file.path}');
       final fileExists = await File(file.path).exists();
       if (!fileExists) {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('File Not Found', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text(
-                  'The file ${file.name} no longer exists at the specified location.',
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-            action: SnackBarAction(
-              label: 'Remove from List',
-              onPressed: () {
-                context.read<FileHistoryProvider>().removeFile(file.path);
-              },
-            ),
-            duration: const Duration(seconds: 8),
-            backgroundColor: Theme.of(context).colorScheme.errorContainer,
-          ),
-        );
+        logger.logError('File not found: ${file.path}');
+        _showFileNotFoundError(context, file);
         return;
       }
+      
+      logger.log('File exists, proceeding with open attempt');
 
       // Try to open the file
       final uri = Uri.file(file.path);
-      final canOpen = await launchUrl(
-        uri,
-        mode: LaunchMode.externalNonBrowserApplication,
-      );
+      
+      // Log debugging information
+      logger.log('File URI: $uri');
+      logger.log('File format: ${file.format}');
+      logger.log('File size: ${await File(file.path).length()} bytes');
+      
+      // First try to open with external application
+      bool canOpen = false;
+      try {
+        logger.log('Attempting to open file with external application');
+        canOpen = await launchUrl(
+          uri,
+          mode: LaunchMode.externalNonBrowserApplication,
+        );
+        logger.log('Launch URL result: $canOpen');
+      } catch (e) {
+        logger.logError('Error launching URL with external app', e);
+        // Try platform default mode as fallback
+        try {
+          logger.log('Attempting to open file with default mode as fallback');
+          canOpen = await launchUrl(uri);
+          logger.log('Fallback launch URL result: $canOpen');
+        } catch (e) {
+          logger.logError('Error launching URL with default mode', e);
+        }
+      }
       
       if (!canOpen) {
         // If we can't launch directly, show error
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
+        logger.logError('Could not open file: No app available to handle this file type');
+        // Store context in local variable to avoid async gap issues
+        final currentContext = context;
+        if (!currentContext.mounted) return;
+        ScaffoldMessenger.of(currentContext).showSnackBar(
           SnackBar(
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -275,12 +286,16 @@ class RecentFilesScreen extends StatelessWidget {
               label: 'Show Location',
               onPressed: () async {
                 final folder = Uri.file(File(file.path).parent.path);
+                logger.log('Attempting to open folder: $folder');
                 if (!await launchUrl(
                   folder,
                   mode: LaunchMode.externalNonBrowserApplication,
                 )) {
-                  // ignore: use_build_context_synchronously
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  logger.logError('Could not open file location: $folder');
+                  // Store context in local variable to avoid async gap issues
+                  final folderContext = context;
+                  if (!folderContext.mounted) return;
+                  ScaffoldMessenger.of(folderContext).showSnackBar(
                     SnackBar(
                       content: const Text('Could not open file location'),
                       backgroundColor: Theme.of(context).colorScheme.error,
@@ -293,7 +308,11 @@ class RecentFilesScreen extends StatelessWidget {
           ),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Log the error with stack trace
+      logger.logError('Exception when opening file', e, stackTrace);
+      // Check if context is still mounted
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Column(
@@ -316,6 +335,8 @@ class RecentFilesScreen extends StatelessWidget {
   }
 
   void _showFileNotFoundError(BuildContext context, SavedFile file) {
+    final logger = LoggerService();
+    logger.log('Showing file not found dialog for: ${file.path}');
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -331,6 +352,7 @@ class RecentFilesScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              logger.log('Removing file from history: ${file.path}');
               Provider.of<FileHistoryProvider>(context, listen: false)
                   .removeFile(file.path);
             },
